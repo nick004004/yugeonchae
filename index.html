@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>통계학입문 핵심 개념 객관식 퀴즈</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- KaTeX 수학 수식 렌더러 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="bg-indigo-700 text-white py-6 shadow-md">
+        <div class="max-w-4xl mx-auto px-4">
+            <h1 class="text-2xl md:text-3xl font-bold">통계학입문 핵심 개념 퀴즈</h1>
+            <p class="text-indigo-200 text-sm mt-1">2장 표와 그래프 | 3장 수치 기술통계 | 4장 확률 (Realtime Database 연동)</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 py-8 flex-grow w-full">
+        <!-- Progress & Score Header -->
+        <div id="quiz-header" class="hidden bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex justify-between items-center">
+            <div>
+                <span class="text-xs font-semibold uppercase tracking-wider text-indigo-600">진행 상황</span>
+                <p id="progress-text" class="text-lg font-bold text-slate-700">문제 1 / 6</p>
+            </div>
+            <div class="text-right">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">현재 점수</span>
+                <p id="score-text" class="text-lg font-bold text-indigo-600">0 점</p>
+            </div>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quiz-container" class="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-slate-200">
+            <!-- Loading Spinner -->
+            <div id="loading-spinner" class="text-center py-12">
+                <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent"></div>
+                <p class="mt-4 text-slate-600 font-medium">Realtime Database 연동 및 데이터 동기화 중...</p>
+            </div>
+
+            <!-- Question Card -->
+            <div id="question-card" class="hidden space-y-6">
+                <div class="flex items-center space-x-2">
+                    <span id="chapter-tag" class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-3 py-1 rounded-full"></span>
+                    <span id="topic-tag" class="bg-slate-100 text-slate-600 text-xs font-medium px-3 py-1 rounded-full"></span>
+                </div>
+
+                <h2 id="question-text" class="text-xl font-bold text-slate-900 leading-relaxed"></h2>
+
+                <div id="options-container" class="space-y-3 pt-2"></div>
+
+                <div id="explanation-box" class="hidden mt-6 p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 space-y-2">
+                    <div id="result-badge" class="font-bold text-sm px-2.5 py-1 rounded inline-block"></div>
+                    <p id="explanation-text" class="text-sm leading-relaxed mt-2"></p>
+                </div>
+
+                <div class="pt-4 flex justify-end">
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold transition">
+                        다음 문제로 →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Result Screen -->
+            <div id="result-screen" class="hidden text-center py-8 space-y-6">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full text-3xl font-bold">
+                    ✓
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">퀴즈 완료!</h2>
+                <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-100 max-w-sm mx-auto">
+                    <p class="text-sm text-indigo-700 font-medium">최종 점수</p>
+                    <p id="final-score" class="text-4xl font-extrabold text-indigo-900 mt-1">0 / 00</p>
+                </div>
+                <button onclick="restartQuiz()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold shadow-md transition">
+                    다시 풀기
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-slate-100 text-slate-500 py-4 text-center text-xs border-t border-slate-200">
+        통계학입문 퀴즈 시스템 (Firebase Realtime Database + GitHub Pages)
+    </footer>
+
+    <!-- Firebase SDK (Realtime Database v10 Modular) 및 앱 로직 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // 🔥 본인의 Firebase 프로젝트 설정값으로 변경하세요
+        // (databaseURL 항목이 필수로 포함되어야 합니다)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://guncea-e3f9f-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // 기본 문항 데이터 (강의자료 기반)
+        const initialQuestions = [
+            {
+                order: 1,
+                chapter: "2장 표와 그래프",
+                topic: "왜도(Skewness)",
+                question: "자료의 히스토그램이 오른쪽으로 긴 꼬리를 갖는 양의 왜도(Right-skewed) 형태일 때, 중심위치 척도들의 크기 관계는 어떠한가?",
+                options: [
+                    "Mode < Median < Mean",
+                    "Mean < Median < Mode",
+                    "Mean = Median = Mode",
+                    "Median < Mode < Mean"
+                ],
+                correctIndex: 0,
+                explanation: "오른쪽으로 긴 꼬리를 가지는 양의 왜도(Right skewed) 분포에서는 극단적으로 큰 값들의 영향으로 평균이 가장 커지므로 Mode < Median < Mean 관계가 성립합니다[cite: 9, 76]."
+            },
+            {
+                order: 2,
+                chapter: "2장 표와 그래프",
+                topic: "탐색적 자료분석",
+                question: "기술통계 그래프 도구에 대한 설명 중 올바르지 않은 것은?",
+                options: [
+                    "상자그림(Box Plot)은 다섯숫자요약(최소값, Q1, 중앙값, Q3, 최대값)을 바탕으로 시각화한다.",
+                    "누적도수곡선(Ogive)은 누적상대도수를 꺾은선 그래프 형태로 나타낸 것이다.",
+                    "줄기-잎 그림(Stem-and-Leaf)은 히스토그램과 달리 원본 자료의 수치 값을 알 수 없다.",
+                    "평행좌표그림에서 선들이 X자로 교차하면 두 변수 간에 음의 선형관계가 있음을 의미한다."
+                ],
+                correctIndex: 2,
+                explanation: "줄기-잎 그림은 히스토그램이 생략하는 정보를 추가로 표현하여 각 자료의 실제 값을 알 수 있다는 특징이 있습니다[cite: 11]."
+            },
+            {
+                order: 3,
+                chapter: "3장 수치 기술통계",
+                topic: "사분위 범위(IQR)",
+                question: "다음 자료의 4분위수 범위(Interquartile Range, IQR)를 구하시오: [11, 12, 13, 16, 16, 17, 17, 18, 21]",
+                options: ["4.0", "5.0", "6.0", "10.0"],
+                correctIndex: 1,
+                explanation: "제1사분위수 Q1 = 12.5, 제3사분위수 Q3 = 17.5이며, 사분위간 범위 IQR = Q3 - Q1 = 17.5 - 12.5 = 5.0이 됩니다[cite: 81]."
+            },
+            {
+                order: 4,
+                chapter: "3장 수치 기술통계",
+                topic: "상관계수(Correlation)",
+                question: "피어슨 상관계수($r_{xy}$)의 성질에 대한 설명으로 틀린 것은?",
+                options: [
+                    "상관계수는 항상 $-1 \\le r_{xy} \\le 1$ 범위의 값을 갖는다.",
+                    "상관계수는 단위가 없는 표준화된 수치이다.",
+                    "공분산을 각 변수의 표준편차의 곱으로 나누어 구한다.",
+                    "상관계수가 0이면 두 변수 사이에 아무런 통계적 관계도 존재하지 않는다."
+                ],
+                correctIndex: 3,
+                explanation: "상관계수 $r=0$은 두 변수 사이에 '선형적 관계'가 존재하지 않음을 뜻하며, 2차 함수 등 비선형 관계가 존재할 수 있습니다[cite: 90, 93]."
+            },
+            {
+                order: 5,
+                chapter: "4장 확률",
+                topic: "독립사건(Independence)",
+                question: "두 사건 A와 B가 서로 독립(Independent)일 때, 항상 성립하는 조건은?",
+                options: [
+                    "$P(A \\cap B) = 0$",
+                    "$P(A \\cup B) = P(A) + P(B)$",
+                    "$P(A\vert{}B) = P(A)$",
+                    "$P(A\vert{}B) = P(B\vert{}A)$"
+                ],
+                correctIndex: 2,
+                explanation: "독립사건이란 어느 사건이 다른 사건과 일어날 확률이 서로 무관할 때를 뜻하며 $P(A\vert{}B) = P(A)$가 성립합니다[cite: 57]."
+            },
+            {
+                order: 6,
+                chapter: "4장 확률",
+                topic: "베이즈 정리(Bayes)",
+                question: "어느 대학 응시생의 남녀 비율이 0.7과 0.3이고, 여학생 합격률은 0.6, 남학생 합격률은 0.2이다. 합격한 신입생 중 남학생일 사후확률은?",
+                options: ["35.0%", "43.8%", "56.3%", "70.0%"],
+                correctIndex: 1,
+                explanation: "전체 합격 확률은 $(0.7 \\times 0.2) + (0.3 \\times 0.6) = 0.32$이며, 합격자 중 남학생일 확률은 $0.14 / 0.32 \\approx 43.8\\%$입니다[cite: 60]."
+            }
+        ];
+
+        let questions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        // Realtime Database에서 데이터 로드 및 자동 초기화(Auto-seed)
+        async function loadQuestionsFromRTDB() {
+            try {
+                const dbRef = ref(db, 'questions');
+                const snapshot = await get(dbRef);
+
+                if (!snapshot.exists()) {
+                    // 데이터가 없으면 기본 데이터를 자동으로 업로드
+                    await set(dbRef, initialQuestions);
+                    questions = initialQuestions;
+                } else {
+                    questions = snapshot.val();
+                }
+
+                document.getElementById('loading-spinner').classList.add('hidden');
+                document.getElementById('quiz-header').classList.remove('hidden');
+                document.getElementById('question-card').classList.remove('hidden');
+                showQuestion();
+            } catch (error) {
+                console.error("Firebase Realtime DB 로딩 오류:", error);
+                document.getElementById('loading-spinner').innerHTML = `
+                    <p class="text-rose-500 font-semibold">데이터베이스 연동에 실패했습니다.</p>
+                    <p class="text-xs text-slate-500 mt-1">Firebase 설정 및 databaseURL을 확인해주세요.</p>
+                `;
+            }
+        }
+
+        function showQuestion() {
+            answered = false;
+            const q = questions[currentIndex];
+
+            document.getElementById('progress-text').innerText = `문제 ${currentIndex + 1} / ${questions.length}`;
+            document.getElementById('score-text').innerText = `${score} 점`;
+            document.getElementById('chapter-tag').innerText = q.chapter;
+            document.getElementById('topic-tag').innerText = q.topic;
+            document.getElementById('question-text').innerText = q.question;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            document.getElementById('explanation-box').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+
+            q.options.forEach((option, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 transition font-medium text-slate-700 flex items-start space-x-3 group";
+                btn.onclick = () => selectOption(idx);
+                btn.innerHTML = `
+                    <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 text-xs flex items-center justify-center font-bold group-hover:bg-indigo-600 group-hover:text-white transition">${idx + 1}</span>
+                    <span class="flex-1">${option}</span>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+
+            if (window.renderMathInElement) {
+                renderMathInElement(document.getElementById('question-card'), {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ]
+                });
+            }
+        }
+
+        function selectOption(selectedIndex) {
+            if (answered) return;
+            answered = true;
+
+            const q = questions[currentIndex];
+            const isCorrect = selectedIndex === q.correctIndex;
+            const buttons = document.getElementById('options-container').children;
+
+            if (isCorrect) score += 10;
+            document.getElementById('score-text').innerText = `${score} 점`;
+
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true;
+                buttons[i].classList.remove('hover:border-indigo-400', 'hover:bg-indigo-50/50');
+                if (i === q.correctIndex) {
+                    buttons[i].classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-900');
+                } else if (i === selectedIndex && !isCorrect) {
+                    buttons[i].classList.add('bg-rose-50', 'border-rose-400', 'text-rose-900');
+                }
+            }
+
+            const expBox = document.getElementById('explanation-box');
+            const badge = document.getElementById('result-badge');
+            const expText = document.getElementById('explanation-text');
+
+            if (isCorrect) {
+                badge.className = "font-bold text-sm px-2.5 py-1 rounded inline-block bg-emerald-100 text-emerald-800";
+                badge.innerText = "정답입니다! 🎉";
+            } else {
+                badge.className = "font-bold text-sm px-2.5 py-1 rounded inline-block bg-rose-100 text-rose-800";
+                badge.innerText = "오답입니다 💡";
+            }
+
+            expText.innerHTML = `<strong>해설:</strong> ${q.explanation}`;
+            expBox.classList.remove('hidden');
+
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.innerText = (currentIndex < questions.length - 1) ? "다음 문제로 →" : "결과 보기 🏆";
+            nextBtn.classList.remove('hidden');
+
+            if (window.renderMathInElement) {
+                renderMathInElement(expBox, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ]
+                });
+            }
+        }
+
+        window.nextQuestion = function() {
+            currentIndex++;
+            if (currentIndex < questions.length) {
+                showQuestion();
+            } else {
+                document.getElementById('question-card').classList.add('hidden');
+                document.getElementById('quiz-header').classList.add('hidden');
+                document.getElementById('result-screen').classList.remove('hidden');
+                document.getElementById('final-score').innerText = `${score} / ${questions.length * 10} 점`;
+            }
+        };
+
+        window.restartQuiz = function() {
+            currentIndex = 0;
+            score = 0;
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('quiz-header').classList.remove('hidden');
+            document.getElementById('question-card').classList.remove('hidden');
+            showQuestion();
+        };
+
+        window.onload = loadQuestionsFromRTDB;
+    </script>
+</body>
+</html>
