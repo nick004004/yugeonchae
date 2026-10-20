@@ -17,7 +17,7 @@
     <header class="bg-indigo-700 text-white py-6 shadow-md">
         <div class="max-w-4xl mx-auto px-4">
             <h1 class="text-2xl md:text-3xl font-bold">통계학입문 전수 문항 퀴즈 시스템</h1>
-            <p class="text-indigo-200 text-sm mt-1">2장, 3장, 4장 이론 완벽 반영 (엑셀 제외, 총 45문항) [made by. Yoonsung]</p>
+            <p class="text-indigo-200 text-sm mt-1">2장, 3장, 4장 이론 완벽 반영 (엑셀 제외, 총 45문항 + 오답 노트 기능) [made by. Yoonsung]</p>
         </div>
     </header>
 
@@ -33,26 +33,37 @@
         <div id="chapter-selection" class="hidden space-y-6">
             <div class="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-slate-200 text-center space-y-3">
                 <h2 class="text-2xl font-bold text-slate-900">학습할 단원을 선택하세요</h2>
-                <p class="text-slate-600 text-sm">강의 자료의 모든 세부 이론과 개념을 담은 장별 퀴즈입니다.</p>
+                <p class="text-slate-600 text-sm">진입할 때마다 문제 순서와 보기가 랜덤으로 섞입니다.</p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-4">
                 <button type="button" id="btn-ch2" class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 hover:border-indigo-500 hover:shadow-lg transition text-left group cursor-pointer">
                     <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Chapter 2</span>
                     <h3 class="text-xl font-bold text-slate-800 mt-3 group-hover:text-indigo-600 transition">표와 그래프</h3>
-                    <p class="text-sm text-slate-500 mt-2">도수분포표, 히스토그램, 상자그림, 분할표, 종횡비 등 (15문항)</p>
+                    <p class="text-sm text-slate-500 mt-2">도수분포표, 히스토그램, 상자그림 등 (15문항)</p>
                 </button>
 
                 <button type="button" id="btn-ch3" class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 hover:border-indigo-500 hover:shadow-lg transition text-left group cursor-pointer">
                     <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Chapter 3</span>
                     <h3 class="text-xl font-bold text-slate-800 mt-3 group-hover:text-indigo-600 transition">수치 기술통계</h3>
-                    <p class="text-sm text-slate-500 mt-2">중심위치, 분산, 표준편차, Z-스코어, 공분산, 상관계수 등 (15문항)</p>
+                    <p class="text-sm text-slate-500 mt-2">중심위치, 분산, 상관계수 등 (15문항)</p>
                 </button>
 
                 <button type="button" id="btn-ch4" class="bg-white p-6 rounded-2xl shadow-md border border-slate-200 hover:border-indigo-500 hover:shadow-lg transition text-left group cursor-pointer">
                     <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Chapter 4</span>
                     <h3 class="text-xl font-bold text-slate-800 mt-3 group-hover:text-indigo-600 transition">확률</h3>
-                    <p class="text-sm text-slate-500 mt-2">표본공간, 조건부확률, 독립사건, 베이즈 정리, 수형도 등 (15문항)</p>
+                    <p class="text-sm text-slate-500 mt-2">표본공간, 조건부확률, 베이즈 정리 등 (15문항)</p>
+                </button>
+            </div>
+
+            <!-- Incorrect Note Button Box -->
+            <div class="bg-amber-50 border border-amber-200 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <h3 class="font-bold text-amber-900 text-lg">오답 노트 복습하기</h3>
+                    <p class="text-amber-700 text-sm mt-1">틀렸거나 "모르겠어요"를 선택했던 문제들만 모아서 다시 풀어봅니다.</p>
+                </div>
+                <button type="button" id="btn-wrong-note" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-6 py-3 rounded-xl shadow transition cursor-pointer whitespace-nowrap">
+                    오답 모아 풀기 (<span id="wrong-count">0</span>문제)
                 </button>
             </div>
         </div>
@@ -81,6 +92,13 @@
 
                 <div id="options-container" class="space-y-3 pt-2"></div>
 
+                <!-- 모르겠어요 버튼 영역 -->
+                <div id="dont-know-container" class="pt-2">
+                    <button type="button" id="btn-dont-know" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-xl transition border border-slate-300 cursor-pointer">
+                        🤔 모르겠어요 (오답 노트에 추가)
+                    </button>
+                </div>
+
                 <div id="explanation-box" class="hidden mt-6 p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 space-y-2">
                     <div id="result-badge" class="font-bold text-sm px-2.5 py-1 rounded inline-block"></div>
                     <p id="explanation-text" class="text-sm leading-relaxed mt-2"></p>
@@ -99,21 +117,21 @@
             <div class="inline-flex items-center justify-center w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full text-3xl font-bold">
                 ✓
             </div>
-            <h2 class="text-2xl font-bold text-slate-800">단원 학습 완료!</h2>
+            <h2 class="text-2xl font-bold text-slate-800">학습 완료!</h2>
             <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-100">
                 <p class="text-sm text-indigo-700 font-medium">최종 점수</p>
                 <p id="final-score" class="text-4xl font-extrabold text-indigo-900 mt-1">0 / 100 점</p>
             </div>
             <div class="flex space-x-3 justify-center">
                 <button type="button" id="retry-select" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold shadow-md transition cursor-pointer">
-                    다른 단원 선택하기
+                    메인 화면으로 가기
                 </button>
             </div>
         </div>
     </main>
 
     <footer class="bg-slate-100 text-slate-500 py-4 text-center text-xs border-t border-slate-200">
-        통계학입문 퀴즈 시스템 (Firebase Realtime Database + GitHub Pages)
+        통계학입문 퀴즈 시스템 (Firebase Realtime Database + 오답노트 기능)
     </footer>
 
     <!-- Firebase SDK 및 퀴즈 로직 -->
@@ -121,7 +139,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // 🔥 본인의 Firebase 설정값으로 변경하세요
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -135,521 +152,79 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // 전체 45문항 (2장 15문항, 3장 15문항, 4장 15문항) - 출처 태그 제거됨
         const allQuestions = [
             // --- 2장 표와 그래프 (1~15) ---
-            {
-                id: 1, chapter: "2장 표와 그래프", topic: "기술통계 정의",
-                question: "기술통계(Descriptive Statistics)에 대한 설명으로 올바른 것은?",
-                options: [
-                    "자료의 대략적인 모습을 요약하여 보여주는 섬세한 분석을 위한 기초단계이다.",
-                    "표본을 통해 모집단을 완벽하게 추론하는 최종 분석 단계이다.",
-                    "가설을 검정하고 유의성을 판정하는 통계적 추측 방법이다.",
-                    "확률 모델을 가정하여 미래의 현상을 예측하는 기법이다."
-                ],
-                correctIndex: 0,
-                explanation: "기술통계는 자료의 대략적인 모습을 보여주는 요약 과정이며, 섬세한 분석을 위한 기초 단계입니다."
-            },
-            {
-                id: 2, chapter: "2장 표와 그래프", topic: "수치 vs 그래프 기술통계",
-                question: "다음 중 수치에 의한 기술통계에 해당하는 예시로 가장 적절한 것은?",
-                options: ["도수분포표", "분할표", "평균과 분산", "산점도"],
-                correctIndex: 2,
-                explanation: "평균, 분산 등은 수치에 의한 기술통계이며, 도수분포표나 산점도 등은 그래프나 표를 이용한 기술통계입니다."
-            },
-            {
-                id: 3, chapter: "2장 표와 그래프", topic: "도수분포표 적용 자료",
-                question: "도수분포표를 주로 작성하는 자료의 척도 유형은?",
-                options: ["명목자료나 순서자료", "연속형 수치자료만 가능", "비율척도 수치 데이터", "시계열 데이터"],
-                correctIndex: 0,
-                explanation: "도수분포표는 명목자료나 순서자료에서 값들을 그대로 사용하거나 종류가 많을 때 묶어서 표현할 때 주로 사용합니다."
-            },
-            {
-                id: 4, chapter: "2장 표와 그래프", topic: "상대도수",
-                question: "도수분포표에서 상대도수를 구하는 올바른 산식은?",
-                options: [
-                    "상대도수 = 도수 / 전체자료의 수",
-                    "상대도수 = 전체자료의 수 / 도수",
-                    "상대도수 = 누적도수 / 계급의 수",
-                    "상대도수 = 도수 × 전체자료의 수"
-                ],
-                correctIndex: 0,
-                explanation: "상대도수는 각 계급의 도수를 전체 자료의 수로 나누어 계산합니다."
-            },
-            {
-                id: 5, chapter: "2장 표와 그래프", topic: "계급 구간과 폭",
-                question: "구간(계측)자료를 도수분포표로 나타낼 때 계급구간(Class Interval) 또는 계급폭에 대한 설명으로 옳은 것은?",
-                options: [
-                    "모든 계급구간 또는 계급폭은 동일하다.",
-                    "처음과 끝의 계급폭은 항상 다르게 설정해야 한다.",
-                    "계급폭은 데이터 개수의 제곱근으로만 지정해야 한다.",
-                    "계급의 개수는 무조건 10개여야 한다."
-                ],
-                correctIndex: 0,
-                explanation: "도수분포표를 작성할 때 모든 계급구간 또는 계급폭은 동일하게 설정합니다."
-            },
-            {
-                id: 6, chapter: "2장 표와 그래프", topic: "누적도수",
-                question: "누적도수(Cumulative Frequency)를 구하는 올바른 방법은?",
-                options: [
-                    "아래 계급에서부터 차례로 도수를 누적시킨다.",
-                    "맨 위 계급의 도수만 단독으로 적는다.",
-                    "전체 도수를 평균하여 균등하게 나눈다.",
-                    "상대도수의 역수를 취해서 더한다."
-                ],
-                correctIndex: 0,
-                explanation: "누적도수는 아래 계급에서부터 차례로 도수를 누적시키며 구합니다."
-            },
-            {
-                id: 7, chapter: "2장 표와 그래프", topic: "Bar Chart와 Pie Chart",
-                question: "명목자료를 그래프로 표현할 때 사용되는 Bar Chart와 Pie Chart에 대한 설명으로 옳은 것은?",
-                options: [
-                    "파이 차트에서 각 항목의 각도는 $360 \\times \\text{상대도수}$로 계산된다.",
-                    "바 차트는 원의 면적을 이용하여 비율을 나타낸다.",
-                    "파이 차트는 항상 세로축에 빈도수를 표시한다.",
-                    "명목자료에는 바 차트를 사용할 수 없다."
-                ],
-                correctIndex: 0,
-                explanation: "파이 차트(Pie Chart)에서 각 항목이 차지하는 각도는 $360 \\times \\text{상대도수}$로 결정됩니다."
-            },
-            {
-                id: 8, chapter: "2장 표와 그래프", topic: "히스토그램의 왜도",
-                question: "히스토그램의 왜도(Skewness)에 대한 설명으로 옳은 것은?",
-                options: [
-                    "오른쪽으로 길게 늘어진 형태를 양의 왜도(Right skewed)라 한다.",
-                    "왼쪽으로 길게 늘어진 형태를 양의 왜도라 한다.",
-                    "왜도는 좌우 대칭인 정도를 뜻하며 방향성은 없다.",
-                    "왜도 값은 항상 0 이상 1 이하의 범위를 가진다."
-                ],
-                correctIndex: 0,
-                explanation: "양의 왜도(Right skewed)는 히스토그램이 오른쪽으로 길게 늘어진 형태를 뜻합니다."
-            },
-            {
-                id: 9, chapter: "2장 표와 그래프", topic: "히스토그램의 봉우리",
-                question: "히스토그램에서 봉우리가 2개인 2봉(Bimodal) 형태가 나타나는 주된 이유는?",
-                options: [
-                    "상이한 집단의 자료들이 서로 섞여 있을 때",
-                    "데이터의 표본 크기가 너무 작을 때",
-                    "계급폭을 너무 좁게 설정했을 때",
-                    "모든 데이터가 완벽하게 정규분포를 따를 때"
-                ],
-                correctIndex: 0,
-                explanation: "남녀 몸무게 자료나 지역별 아파트 가격 등 상이한 집단의 자료들이 섞여 있을 때 2봉(Bimodal) 형태가 나타납니다."
-            },
-            {
-                id: 10, chapter: "2장 표와 그래프", topic: "줄기-잎 그림",
-                question: "줄기-잎 그림(Stem-and-Leaf Display)에 대한 설명으로 옳지 않은 것은?",
-                options: [
-                    "히스토그램을 옆으로 돌려 놓은 것과 구조가 동일하다.",
-                    "각 개별 자료의 실제 값을 알 수 있다는 장점이 있다.",
-                    "히스토그램이 생략하는 세부 정보를 추가로 표현한다.",
-                    "데이터의 실제 수치 정보를 완전히 손실하여 표현한다."
-                ],
-                correctIndex: 3,
-                explanation: "줄기-잎 그림은 각 자료의 실제 값을 알 수 있어 히스토그램이 생략하는 정보를 추가로 표현해 줍니다."
-            },
-            {
-                id: 11, chapter: "2장 표와 그래프", topic: "누적도수곡선(Ogive)",
-                question: "누적도수곡선(Ogive)의 정의로 옳은 것은?",
-                options: [
-                    "도수를 누적하여 꺾은선 그래프 형태로 그린 것",
-                    "변수 두 개의 상관관계를 점으로 찍어 나타낸 것",
-                    "명목자료의 도수를 원형 넓이로 표현한 것",
-                    "시간에 따른 데이터의 변화를 나타낸 막대그래프"
-                ],
-                correctIndex: 0,
-                explanation: "누적도수곡선(Ogive)은 도수를 누적(Cumulative Frequency)하여 꺾은선 그래프 형태로 그린 것입니다."
-            },
-            {
-                id: 12, chapter: "2장 표와 그래프", topic: "상자그림 (Box Plot)",
-                question: "상자그림(Box Plot)의 상자 길이를 결정하는 핵심 요소는?",
-                options: [
-                    "제1사분위수와 제3사분위수",
-                    "평균과 표준편차",
-                    "최소값과 최대값",
-                    "중앙값과 최빈값"
-                ],
-                correctIndex: 0,
-                explanation: "제1사분위수(1st Quartile)와 제3사분위수(3rd Quartile)로 상자의 길이가 결정됩니다."
-            },
-            {
-                id: 13, chapter: "2장 표와 그래프", topic: "시계열그림",
-                question: "시계열그림(Time Series Plot)에 대한 설명으로 옳은 것은?",
-                options: [
-                    "X축은 시간, Y축은 해당 자료를 나타내어 시간 변화에 따른 추이를 보여준다.",
-                    "두 명목형 변수의 교차 빈도를 나타내는 표이다.",
-                    "데이터의 최솟값과 최댓값만을 연결한 상자모양 그림이다.",
-                    "다변량 데이터의 상관관계를 평행선으로 나타낸 것이다."
-                ],
-                correctIndex: 0,
-                explanation: "시계열그림은 X축에 시간, Y축에 해당 자료를 배치하여 시간 변화에 따른 시계열 자료를 그래프로 표현합니다."
-            },
-            {
-                id: 14, chapter: "2장 표와 그래프", topic: "평행좌표그림",
-                question: "평행좌표그림(Parallel Coordinates Plot)에서 선들이 X자로 교차할 때 두 변수 간의 관계를 바르게 해석한 것은?",
-                options: [
-                    "두 변수는 음의 관계(Negative Relationship)이다.",
-                    "두 변수는 양의 관계(Positive Relationship)이다.",
-                    "두 변수 사이에는 아무런 연관성이 없다.",
-                    "두 변수는 완벽한 일치 관계이다."
-                ],
-                correctIndex: 0,
-                explanation: "큰 값은 작은 값으로 연결되어 선들이 X자로 교차하면 두 변수는 서로 음의 관계를 의미합니다."
-            },
-            {
-                id: 15, chapter: "2장 표와 그래프", topic: "종횡비",
-                question: "그래프의 세로와 가로의 실제 비율을 뜻하며, 증가 또는 감소 경향이 45도가 되도록 그리는 것이 좋다고 알려진 개념은?",
-                options: ["종횡비(Aspect Ratio)", "왜도(Skewness)", "첨도(Kurtosis)", "사분위 범위"],
-                correctIndex: 0,
-                explanation: "종횡비(Aspect Ratio)는 실제 그려 놓은 그래프의 X축과 Y축의 비율을 의미하며 45도가 되도록 그리는 것이 좋다고 알려져 있습니다."
-            },
+            { id: 1, chapter: "2장 표와 그래프", topic: "기술통계 정의", question: "기술통계(Descriptive Statistics)에 대한 설명으로 올바른 것은?", options: ["자료의 대략적인 모습을 요약하여 보여주는 섬세한 분석을 위한 기초단계이다.", "표본을 통해 모집단을 완벽하게 추론하는 최종 분석 단계이다.", "가설을 검정하고 유의성을 판정하는 통계적 추측 방법이다.", "확률 모델을 가정하여 미래의 현상을 예측하는 기법이다."], correctIndex: 0, explanation: "기술통계는 자료의 대략적인 모습을 보여주는 요약 과정이며, 섬세한 분석을 위한 기초 단계이다." },
+            { id: 2, chapter: "2장 표와 그래프", topic: "수치 vs 그래프 기술통계", question: "다음 중 수치에 의한 기술통계에 해당하는 예시로 가장 적절한 것은?", options: ["도수분포표", "분할표", "평균과 분산", "산점도"], correctIndex: 2, explanation: "평균, 분산 등은 수치에 의한 기술통계이며, 도수분포표나 산점도 등은 그래프나 표를 이용한 기술통계이다." },
+            { id: 3, chapter: "2장 표와 그래프", topic: "도수분포표 적용 자료", question: "도수분포표를 주로 작성하는 자료의 척도 유형은?", options: ["명목자료나 순서자료", "연속형 수치자료만 가능", "비율척도 수치 데이터", "시계열 데이터"], correctIndex: 0, explanation: "도수분포표는 명목자료나 순서자료에서 값들을 그대로 사용하거나 종류가 많을 때 묶어서 표현할 때 주로 사용한다." },
+            { id: 4, chapter: "2장 표와 그래프", topic: "상대도수", question: "도수분포표에서 상대도수를 구하는 올바른 산식은?", options: ["상대도수 = 도수 / 전체자료의 수", "상대도수 = 전체자료의 수 / 도수", "상대도수 = 누적도수 / 계급의 수", "상대도수 = 도수 × 전체자료의 수"], correctIndex: 0, explanation: "상대도수는 각 계급의 도수를 전체 자료의 수로 나누어 계산한다." },
+            { id: 5, chapter: "2장 표와 그래프", topic: "계급 구간과 폭", question: "구간(계측)자료를 도수분포표로 나타낼 때 계급구간(Class Interval) 또는 계급폭에 대한 설명으로 옳은 것은?", options: ["모든 계급구간 또는 계급폭은 동일하다.", "처음과 끝의 계급폭은 항상 다르게 설정해야 한다.", "계급폭은 데이터 개수의 제곱근으로만 지정해야 한다.", "계급의 개수는 무조건 10개여야 한다."], correctIndex: 0, explanation: "도수분포표를 작성할 때 모든 계급구간 또는 계급폭은 동일하게 설정한다." },
+            { id: 6, chapter: "2장 표와 그래프", topic: "누적도수", question: "누적도수(Cumulative Frequency)를 구하는 올바른 방법은?", options: ["아래 계급에서부터 차례로 도수를 누적시킨다.", "맨 위 계급의 도수만 단독으로 적는다.", "전체 도수를 평균하여 균등하게 나눈다.", "상대도수의 역수를 취해서 더한다."], correctIndex: 0, explanation: "누적도수는 아래 계급에서부터 차례로 도수를 누적시키며 구한다." },
+            { id: 7, chapter: "2장 표와 그래프", topic: "Bar Chart와 Pie Chart", question: "명목자료를 그래프로 표현할 때 사용되는 Bar Chart와 Pie Chart에 대한 설명으로 옳은 것은?", options: ["파이 차트에서 각 항목의 각도는 $360 \\times \\text{상대도수}$로 계산된다.", "바 차트는 원의 면적을 이용하여 비율을 나타낸다.", "파이 차트는 항상 세로축에 빈도수를 표시한다.", "명목자료에는 바 차트를 사용할 수 없다."], correctIndex: 0, explanation: "파이 차트(Pie Chart)에서 각 항목이 차지하는 각도는 $360 \\times \\text{상대도수}$로 결정된다." },
+            { id: 8, chapter: "2장 표와 그래프", topic: "히스토그램의 왜도", question: "히스토그램의 왜도(Skewness)에 대한 설명으로 옳은 것은?", options: ["오른쪽으로 길게 늘어진 형태를 양의 왜도(Right skewed)라 한다.", "왼쪽으로 길게 늘어진 형태를 양의 왜도라 한다.", "왜도는 좌우 대칭인 정도를 뜻하며 방향성은 없다.", "왜도 값은 항상 0 이상 1 이하의 범위를 가진다."], correctIndex: 0, explanation: "양의 왜도(Right skewed)는 히스토그램이 오른쪽으로 길게 늘어진 형태를 뜻한다." },
+            { id: 9, chapter: "2장 표와 그래프", topic: "히스토그램의 봉우리", question: "히스토그램에서 봉우리가 2개인 2봉(Bimodal) 형태가 나타나는 주된 이유는?", options: ["상이한 집단의 자료들이 서로 섞여 있을 때", "데이터의 표본 크기가 너무 작을 때", "계급폭을 너무 좁게 설정했을 때", "모든 데이터가 완벽하게 정규분포를 따를 때"], correctIndex: 0, explanation: "남녀 몸무게 자료나 지역별 아파트 가격 등 상이한 집단의 자료들이 섞여 있을 때 2봉(Bimodal) 형태가 나타난다." },
+            { id: 10, chapter: "2장 표와 그래프", topic: "줄기-잎 그림", question: "줄기-잎 그림(Stem-and-Leaf Display)에 대한 설명으로 옳지 않은 것은?", options: ["히스토그램을 옆으로 돌려 놓은 것과 구조가 동일하다.", "각 개별 자료의 실제 값을 알 수 있다는 장점이 있다.", "히스토그램이 생략하는 세부 정보를 추가로 표현한다.", "데이터의 실제 수치 정보를 완전히 손실하여 표현한다."], correctIndex: 3, explanation: "줄기-잎 그림은 각 자료의 실제 값을 알 수 있어 히스토그램이 생략하는 정보를 추가로 표현해 준다." },
+            { id: 11, chapter: "2장 표와 그래프", topic: "누적도수곡선(Ogive)", question: "누적도수곡선(Ogive)의 정의로 옳은 것은?", options: ["도수를 누적하여 꺾은선 그래프 형태로 그린 것", "변수 두 개의 상관관계를 점으로 찍어 나타낸 것", "명목자료의 도수를 원형 넓이로 표현한 것", "시간에 따른 데이터의 변화를 나타낸 막대그래프"], correctIndex: 0, explanation: "누적도수곡선(Ogive)은 도수를 누적(Cumulative Frequency)하여 꺾은선 그래프 형태로 그린 것이다." },
+            { id: 12, chapter: "2장 표와 그래프", topic: "상자그림 (Box Plot)", question: "상자그림(Box Plot)의 상자 길이를 결정하는 핵심 요소는?", options: ["제1사분위수와 제3사분위수", "평균과 표준편차", "최소값과 최대값", "중앙값과 최빈값"], correctIndex: 0, explanation: "제1사분위수(1st Quartile)와 제3사분위수(3rd Quartile)로 상자의 길이가 결정된다." },
+            { id: 13, chapter: "2장 표와 그래프", topic: "시계열그림", question: "시계열그림(Time Series Plot)에 대한 설명으로 옳은 것은?", options: ["X축은 시간, Y축은 해당 자료를 나타내어 시간 변화에 따른 추이를 보여준다.", "두 명목형 변수의 교차 빈도를 나타내는 표이다.", "데이터의 최솟값과 최댓값만을 연결한 상자모양 그림이다.", "다변량 데이터의 상관관계를 평행선으로 나타낸 것이다."], correctIndex: 0, explanation: "시계열그림은 X축에 시간, Y축에 해당 자료를 배치하여 시간 변화에 따른 시계열 자료를 그래프로 표현한다." },
+            { id: 14, chapter: "2장 표와 그래프", topic: "평행좌표그림", question: "평행좌표그림(Parallel Coordinates Plot)에서 선들이 X자로 교차할 때 두 변수 간의 관계를 바르게 해석한 것은?", options: ["두 변수는 음의 관계(Negative Relationship)이다.", "두 변수는 양의 관계(Positive Relationship)이다.", "두 변수 사이에는 아무런 연관성이 없다.", "두 변수는 완벽한 일치 관계이다."], correctIndex: 0, explanation: "큰 값은 작은 값으로 연결되어 선들이 X자로 교차하면 두 변수는 서로 음의 관계를 의미한다." },
+            { id: 15, chapter: "2장 표와 그래프", topic: "종횡비", question: "그래프의 세로와 가로의 실제 비율을 뜻하며, 증가 또는 감소 경향이 45도가 되도록 그리는 것이 좋다고 알려진 개념은?", options: ["종횡비(Aspect Ratio)", "왜도(Skewness)", "첨도(Kurtosis)", "사분위 범위"], correctIndex: 0, explanation: "종횡비(Aspect Ratio)는 실제 그려 놓은 그래프의 X축과 Y축의 비율을 의미하며 45도가 되도록 그리는 것이 좋다고 알려져 있다." },
 
             // --- 3장 수치 기술통계 (16~30) ---
-            {
-                id: 16, chapter: "3장 수치 기술통계", topic: "수치 기술통계 척도 분류",
-                question: "수치 기술통계에서 자료의 정보를 요약하기 위해 분류하는 척도에 포함되지 않는 것은?",
-                options: ["중심위치 척도", "변동성 척도", "연관성 척도", "확률밀도 척도"],
-                correctIndex: 3,
-                explanation: "수치 기술통계의 척도 분류는 중심위치 척도, 변동성 척도, 연관성 척도로 나뉩니다."
-            },
-            {
-                id: 17, chapter: "3장 수치 기술통계", topic: "표본평균과 모평균",
-                question: "표본 크기가 n일 때 표본평균($\\bar{x}$)을 구하는 올바른 수식은?",
-                options: [
-                    "$\\bar{x} = \\frac{\\sum_{i=1}^{n} x_i}{n}$",
-                    "$\\bar{x} = \\frac{\\sum_{i=1}^{N} x_i}{N}$",
-                    "$\\bar{x} = \\frac{\\sum x_i}{n - 1}$",
-                    "$\\bar{x} = \\sqrt{\\frac{\\sum (x_i - \\bar{x})^2}{n}}$"
-                ],
-                correctIndex: 0,
-                explanation: "표본평균은 자료를 모두 더한 뒤 표본의 크기 n으로 나눈 값입니다."
-            },
-            {
-                id: 18, chapter: "3장 수치 기술통계", topic: "중앙값의 장점",
-                question: "자료에 특이하게 크거나 작은 극단값이 존재할 때, 평균보다 중앙값(Median)이 대표값으로 선호되는 이유는?",
-                options: [
-                    "극단적인 값의 영향을 받지 않기 때문이다.",
-                    "계산 과정이 평균보다 훨씬 복잡하기 때문이다.",
-                    "항상 최빈값과 동일한 값을 가지기 때문이다.",
-                    "음수 값을 가질 수 없기 때문이다."
-                ],
-                correctIndex: 0,
-                explanation: "중앙값은 특이하게 작거나 큰 값이 자료에 있어도 영향을 받지 않는 장점이 있습니다."
-            },
-            {
-                id: 19, chapter: "3장 수치 기술통계", topic: "최빈값의 활용",
-                question: "명목자료(예: 올해 유행하는 옷 색깔)의 경우 평균이나 중앙값을 구할 수 없어 사용하는 중심위치 척도는?",
-                options: ["최빈값(Mode)", "표본분산", "사분위 범위", "변동계수"],
-                correctIndex: 0,
-                explanation: "명목자료인 경우 평균과 중앙값은 의미가 없으므로 빈도가 최대인 최빈값을 사용합니다."
-            },
-            {
-                id: 20, chapter: "3장 수치 기술통계", topic: "왜도와 대표값 관계",
-                question: "자료가 음의 왜도(Left skewed)를 가질 때, 중심위치 척도들의 크기 관계는?",
-                options: [
-                    "Mean < Median < Mode",
-                    "Mode < Median < Mean",
-                    "Mean = Median = Mode",
-                    "Median < Mean < Mode"
-                ],
-                correctIndex: 0,
-                explanation: "음의 왜도 분포에서는 Mean < Median < Mode 관계가 성립합니다."
-            },
-            {
-                id: 21, chapter: "3장 수치 기술통계", topic: "4분위수",
-                question: "자료를 크기 순으로 나열한 후 똑같은 크기의 네 덩어리로 나눌 때, 제2사분위수($Q_2$)는 어떤 값과 동일한가?",
-                options: ["중앙값(Median)", "최빈값(Mode)", "최대값", "범위(Range)"],
-                correctIndex: 0,
-                explanation: "50%에 해당하는 제2사분위수는 중앙값과 동일합니다."
-            },
-            {
-                id: 22, chapter: "3장 수치 기술통계", topic: "변동성 척도 종류",
-                question: "다음 중 자료가 퍼져 있는 정도를 나타내는 변동성 척도(퍼짐 척도)가 아닌 것은?",
-                options: ["범위(Range)", "4분위 범위(IQR)", "최빈값(Mode)", "표준편차(Standard deviation)"],
-                correctIndex: 2,
-                explanation: "최빈값은 중심위치 척도에 해당하며, 범위, IQR, 분산, 표준편차, 변동계수는 변동성 척도입니다."
-            },
-            {
-                id: 23, chapter: "3장 수치 기술통계", topic: "4분위 범위(IQR)",
-                question: "4분위 범위(Interquartile Range, IQR)의 올바른 계산 공식은?",
-                options: [
-                    "$\\text{IQR} = Q_3 - Q_1$",
-                    "$\\text{IQR} = Q_3 + Q_1$",
-                    "$\\text{IQR} = \\text{최대값} - \\text{최소값}$",
-                    "$\\text{IQR} = Q_2 - Q_1$"
-                ],
-                correctIndex: 0,
-                explanation: "IQR은 제3사분위수와 제1사분위수의 거리로 계산됩니다."
-            },
-            {
-                id: 24, chapter: "3장 수치 기술통계", topic: "표본분산",
-                question: "표본분산($s^2$)을 계산할 때 편차 제곱의 합을 나누어주는 분모(자유도)는?",
-                options: ["n - 1", "n", "N", "n + 1"],
-                correctIndex: 0,
-                explanation: "표본분산은 편차 제곱의 합을 n-1로 나눈 값입니다."
-            },
-            {
-                id: 25, chapter: "3장 수치 기술통계", topic: "변동계수(CV)",
-                question: "변동계수(Coefficient of Variation)를 올바르게 정의한 공식은?",
-                options: [
-                    "$(\\text{표준편차} / \\text{평균}) \\times 100\\%$",
-                    "$(\\text{평균} / \\text{표준편차}) \\times 100\\%$",
-                    "$(\\text{분산} / \\text{평균}) \\times 100\\%$",
-                    "$(\\text{범위} / \\text{중앙값}) \\times 100\\$"
-                ],
-                correctIndex: 0,
-                explanation: "변동계수는 표준편차를 평균으로 나누고 100을 곱하여 백분율로 표시합니다."
-            },
-            {
-                id: 26, chapter: "3장 수치 기술통계", topic: "Z-스코어와 특잇값",
-                question: "일반적으로 데이터에서 특잇값(Outlier)을 판별할 때 기준으로 고려하는 Z-스코어의 범위는?",
-                options: [
-                    "$-2 \\sim 2$ 또는 $-3 \\sim 3$ 범위를 벗어나는 경우",
-                    "$-1 \\sim 1$ 범위를 벗어나는 경우",
-                    "$-10 \\sim 10$ 범위를 벗어나는 경우",
-                    "항상 0 이하인 경우"
-                ],
-                correctIndex: 0,
-                explanation: "일반적으로 Z-스코어 값이 -2~2 또는 -3~3을 벗어나는 경우 특잇값으로 생각합니다."
-            },
-            {
-                id: 27, chapter: "3장 수치 기술통계", topic: "공분산의 부호",
-                question: "표본 공분산($s_{xy}$)이 음수($<0$)일 때 두 변수 X와 Y의 선형 관계는?",
-                options: [
-                    "음의 선형 관계(Negatively linear relationship)",
-                    "양의 선형 관계(Positively linear relationship)",
-                    "선형 관계가 전혀 없음",
-                    "완벽한 비선형 관계"
-                ],
-                correctIndex: 0,
-                explanation: "표본 공분산이 음수이면 X와 Y는 음의 선형 관계를 의미합니다."
-            },
-            {
-                id: 28, chapter: "3장 수치 기술통계", topic: "상관계수 범위",
-                question: "피어슨 표본 상관계수($r_{xy}$)가 가질 수 있는 값의 범위는?",
-                options: [
-                    "$-1 \\le r_{xy} \\le +1$",
-                    "$0 \\le r_{xy} \\le +1$",
-                    "$-\\infty \\le r_{xy} \\le +\\infty$",
-                    "$0 \\le r_{xy} \\le 100$"
-                ],
-                correctIndex: 0,
-                explanation: "피어슨 상관계수는 항상 -1과 +1 사이의 값을 가집니다."
-            },
-            {
-                id: 29, chapter: "3장 수치 기술통계", topic: "상관계수 단위",
-                question: "피어슨 상관계수($r_{xy}$)의 측정 단위(Unit)에 대한 설명으로 옳은 것은?",
-                options: [
-                    "상관계수는 단위가 없다.",
-                    "X와 Y의 단위가 곱해진 형태의 단위를 가진다.",
-                    "항상 백분율(%) 단위를 가진다.",
-                    "길이(m) 또는 무게(kg) 단위를 가진다."
-                ],
-                correctIndex: 0,
-                explanation: "상관계수는 표준편차로 나누어 표준화한 값이므로 단위가 없습니다."
-            },
-            {
-                id: 30, chapter: "3장 수치 기술통계", topic: "비선형 관계와 상관계수",
-                question: "두 변수 간에 완벽한 2차 함수 등 비선형 관계가 존재할 때, 피어슨 상관계수($r_{xy}$)의 값은?",
-                options: [
-                    "약 0 ($r_{xy} = 0$)",
-                    "반드시 +1이다.",
-                    "반드시 -1이다.",
-                    "무한대의 값을 가진다."
-                ],
-                correctIndex: 0,
-                explanation: "비선형 관계인 경우 피어슨 상관계수는 0에 가까운 값을 가집니다."
-            },
+            { id: 16, chapter: "3장 수치 기술통계", topic: "수치 기술통계 척도 분류", question: "수치 기술통계에서 자료의 정보를 요약하기 위해 분류하는 척도에 포함되지 않는 것은?", options: ["중심위치 척도", "변동성 척도", "연관성 척도", "확률밀도 척도"], correctIndex: 3, explanation: "수치 기술통계의 척도 분류는 중심위치 척도, 변동성 척도, 연관성 척도로 나뉜다." },
+            { id: 17, chapter: "3장 수치 기술통계", topic: "표본평균과 모평균", question: "표본 크기가 n일 때 표본평균($\\bar{x}$)을 구하는 올바른 수식은?", options: ["$\\bar{x} = \\frac{\\sum_{i=1}^{n} x_i}{n}$", "$\\bar{x} = \\frac{\\sum_{i=1}^{N} x_i}{N}$", "$\\bar{x} = \\frac{\\sum x_i}{n - 1}$", "$\\bar{x} = \\sqrt{\\frac{\\sum (x_i - \\bar{x})^2}{n}}$"], correctIndex: 0, explanation: "표본평균은 자료를 모두 더한 뒤 표본의 크기 n으로 나눈 값이다." },
+            { id: 18, chapter: "3장 수치 기술통계", topic: "중앙값의 장점", question: "자료에 특이하게 크거나 작은 극단값이 존재할 때, 평균보다 중앙값(Median)이 대표값으로 선호되는 이유는?", options: ["극단적인 값의 영향을 받지 않기 때문이다.", "계산 과정이 평균보다 훨씬 복잡하기 때문이다.", "항상 최빈값과 동일한 값을 가지기 때문이다.", "음수 값을 가질 수 없기 때문이다."], correctIndex: 0, explanation: "중앙값은 특이하게 작거나 큰 값이 자료에 있어도 영향을 받지 않는 장점이 있다." },
+            { id: 19, chapter: "3장 수치 기술통계", topic: "최빈값의 활용", question: "명목자료(예: 올해 유행하는 옷 색깔)의 경우 평균이나 중앙값을 구할 수 없어 사용하는 중심위치 척도는?", options: ["최빈값(Mode)", "표본분산", "사분위 범위", "변동계수"], correctIndex: 0, explanation: "명목자료인 경우 평균과 중앙값은 의미가 없으므로 빈도가 최대인 최빈값을 사용한다." },
+            { id: 20, chapter: "3장 수치 기술통계", topic: "왜도와 대표값 관계", question: "자료가 음의 왜도(Left skewed)를 가질 때, 중심위치 척도들의 크기 관계는?", options: ["Mean < Median < Mode", "Mode < Median < Mean", "Mean = Median = Mode", "Median < Mean < Mode"], correctIndex: 0, explanation: "음의 왜도 분포에서는 Mean < Median < Mode 관계가 성립한다." },
+            { id: 21, chapter: "3장 수치 기술통계", topic: "4분위수", question: "자료를 크기 순으로 나열한 후 똑같은 크기의 네 덩어리로 나눌 때, 제2사분위수($Q_2$)는 어떤 값과 동일한가?", options: ["중앙값(Median)", "최빈값(Mode)", "최대값", "범위(Range)"], correctIndex: 0, explanation: "50%에 해당하는 제2사분위수는 중앙값과 동일하다." },
+            { id: 22, chapter: "3장 수치 기술통계", topic: "변동성 척도 종류", question: "다음 중 자료가 퍼져 있는 정도를 나타내는 변동성 척도(퍼짐 척도)가 아닌 것은?", options: ["범위(Range)", "4분위 범위(IQR)", "최빈값(Mode)", "표준편차(Standard deviation)"], correctIndex: 2, explanation: "최빈값은 중심위치 척도에 해당하며, 범위, IQR, 분산, 표준편차, 변동계수는 변동성 척도이다." },
+            { id: 23, chapter: "3장 수치 기술통계", topic: "4분위 범위(IQR)", question: "4분위 범위(Interquartile Range, IQR)의 올바른 계산 공식은?", options: ["$\\text{IQR} = Q_3 - Q_1$", "$\\text{IQR} = Q_3 + Q_1$", "$\\text{IQR} = \\text{최대값} - \\text{최소값}$", "$\\text{IQR} = Q_2 - Q_1$"], correctIndex: 0, explanation: "IQR은 제3사분위수와 제1사분위수의 거리로 계산된다." },
+            { id: 24, chapter: "3장 수치 기술통계", topic: "표본분산", question: "표본분산($s^2$)을 계산할 때 편차 제곱의 합을 나누어주는 분모(자유도)는?", options: ["n - 1", "n", "N", "n + 1"], correctIndex: 0, explanation: "표본분산은 편차 제곱의 합을 n-1로 나눈 값이다." },
+            { id: 25, chapter: "3장 수치 기술통계", topic: "변동계수(CV)", question: "변동계수(Coefficient of Variation)를 올바르게 정의한 공식은?", options: ["$(\\text{표준편차} / \\text{평균}) \\times 100\\%$", "$(\\text{평균} / \\text{표준편차}) \\times 100\\%$", "$(\\text{분산} / \\text{평균}) \\times 100\\%$", "$(\\text{범위} / \\text{중앙값}) \\times 100\\$"], correctIndex: 0, explanation: "변동계수는 표준편차를 평균으로 나누고 100을 곱하여 백분율로 표시한다." },
+            { id: 26, chapter: "3장 수치 기술통계", topic: "Z-스코어와 특잇값", question: "일반적으로 데이터에서 특잇값(Outlier)을 판별할 때 기준으로 고려하는 Z-스코어의 범위는?", options: ["$-2 \\sim 2$ 또는 $-3 \\sim 3$ 범위를 벗어나는 경우", "$-1 \\sim 1$ 범위를 벗어나는 경우", "$-10 \\sim 10$ 범위를 벗어나는 경우", "항상 0 이하인 경우"], correctIndex: 0, explanation: "일반적으로 Z-스코어 값이 -2~2 또는 -3~3을 벗어나는 경우 특잇값으로 생각한다." },
+            { id: 27, chapter: "3장 수치 기술통계", topic: "공분산의 부호", question: "표본 공분산($s_{xy}$)이 음수($<0$)일 때 두 변수 X와 Y의 선형 관계는?", options: ["음의 선형 관계(Negatively linear relationship)", "양의 선형 관계(Positively linear relationship)", "선형 관계가 전혀 없음", "완벽한 비선형 관계"], correctIndex: 0, explanation: "표본 공분산이 음수이면 X와 Y는 음의 선형 관계를 의미한다." },
+            { id: 28, chapter: "3장 수치 기술통계", topic: "상관계수 범위", question: "피어슨 표본 상관계수($r_{xy}$)가 가질 수 있는 값의 범위는?", options: ["$-1 \\le r_{xy} \\le +1$", "$0 \\le r_{xy} \\le +1$", "$-\\infty \\le r_{xy} \\le +\\infty$", "$0 \\le r_{xy} \\le 100$"], correctIndex: 0, explanation: "피어슨 상관계수는 항상 -1과 +1 사이의 값을 가진다." },
+            { id: 29, chapter: "3장 수치 기술통계", topic: "상관계수 단위", question: "피어슨 상관계수($r_{xy}$)의 측정 단위(Unit)에 대한 설명으로 옳은 것은?", options: ["상관계수는 단위가 없다.", "X와 Y의 단위가 곱해진 형태의 단위를 가진다.", "항상 백분율(%) 단위를 가진다.", "길이(m) 또는 무게(kg) 단위를 가진다."], correctIndex: 0, explanation: "상관계수는 표준편차로 나누어 표준화한 값이므로 단위가 없다." },
+            { id: 30, chapter: "3장 수치 기술통계", topic: "비선형 관계와 상관계수", question: "두 변수 간에 완벽한 2차 함수 등 비선형 관계가 존재할 때, 피어슨 상관계수($r_{xy}$)의 값은?", options: ["약 0 ($r_{xy} = 0$)", "반드시 +1이다.", "반드시 -1이다.", "무한대의 값을 가진다."], correctIndex: 0, explanation: "비선형 관계인 경우 피어슨 상관계수는 0에 가까운 값을 가진다." },
 
             // --- 4장 확률 (31~45) ---
-            {
-                id: 31, chapter: "4장 확률", topic: "사건과 표본공간",
-                question: "일어날 수 있는 모든 가능한 단순사건을 모아 집합으로 표시한 것을 무엇이라 하는가?",
-                options: ["표본공간(Sample Space)", "단순사건", "조건부확률", "여집합"],
-                correctIndex: 0,
-                explanation: "표본공간은 발생 가능한 모든 단순사건을 모아 집합으로 표시한 것입니다."
-            },
-            {
-                id: 32, chapter: "4장 확률", topic: "표본공간의 성질",
-                question: "표본공간을 구성하는 원소들이 갖추어야 할 필수적인 수학적 성질은?",
-                options: [
-                    "모든 원소를 포함(exhaustive)하며 상호배반(mutually exclusive)이어야 한다.",
-                    "원소의 개수가 항상 짝수이어야 한다.",
-                    "각 원소의 확률은 모두 달라야 한다.",
-                    "음수 확률값을 반드시 포함해야 한다."
-                ],
-                correctIndex: 0,
-                explanation: "표본공간은 모든 원소를 포함(exhaustive)하고 상호배반(mutually exclusive)이어야 합니다."
-            },
-            {
-                id: 33, chapter: "4장 확률", topic: "확률의 정의 접근법",
-                question: "무수히 많이 시행하였을 때 그 사건이 일어난 비율이 수렴해가는 값으로 확률을 정의하는 접근법은?",
-                options: [
-                    "상대적 비율 접근(Relative frequency approach)",
-                    "전통적 접근(Classic approach)",
-                    "주관적 접근(Subjective approach)",
-                    "공리적 접근"
-                ],
-                correctIndex: 0,
-                explanation: "무수히 많이 시행했을 때 수렴해가는 비율을 이용하는 것은 상대적 비율 접근입니다."
-            },
-            {
-                id: 34, chapter: "4장 확률", topic: "확률 할당의 기본 규칙",
-                question: "표본공간의 사건 $E_1, E_2, \\dots, E_n$에 대해 확률 할당 시 항상 성립하는 조건으로 옳은 것은?",
-                options: [
-                    "$0 \\le P(E_i) \\le 1$ 이며 모든 사건의 확률 합은 1이다.",
-                    "각 사건의 확률은 항상 0.5여야 한다.",
-                    "확률의 합은 항상 표본의 크기 n과 같다.",
-                    "개별 확률은 1을 초과할 수 있다."
-                ],
-                correctIndex: 0,
-                explanation: "모든 사건의 확률은 0과 1 사이이며, 전부 더하면 1이 되어야 합니다."
-            },
-            {
-                id: 35, chapter: "4장 확률", topic: "여집합 규칙",
-                question: "사건 A의 여집합($A^C$) 확률을 구하는 여집합 규칙 공식은?",
-                options: [
-                    "$P(A) = 1 - P(A^C)$",
-                    "$P(A) = P(A^C) - 1$",
-                    "$P(A) = 1 / P(A^C)$",
-                    "$P(A) = P(A^C)$"
-                ],
-                correctIndex: 0,
-                explanation: "여집합 규칙에 따라 $P(A) = 1 - P(A^C)$가 성립합니다."
-            },
-            {
-                id: 36, chapter: "4장 확률", topic: "상호배반 사건의 합규칙",
-                question: "두 사건 A와 B가 서로 상호배반(Mutually exclusive)일 때, 합집합의 확률 $P(A \\cup B)$는?",
-                options: [
-                    "$P(A) + P(B)$",
-                    "$P(A) + P(B) - P(A \\cap B)$",
-                    "$P(A) \\times P(B)$",
-                    "0"
-                ],
-                correctIndex: 0,
-                explanation: "상호배반 사건인 경우 교집합 확률이 0이므로 $P(A \\cup B) = P(A) + P(B)$가 됩니다."
-            },
-            {
-                id: 37, chapter: "4장 확률", topic: "주변확률과 결합확률",
-                question: "두 개 이상의 변수를 동시에 고려하는 상황에서 교집합의 확률을 뜻하는 용어는?",
-                options: [
-                    "결합확률(Joint probability)",
-                    "주변확률(Marginal probability)",
-                    "조건부확률",
-                    "여집합 확률"
-                ],
-                correctIndex: 0,
-                explanation: "교집합의 확률은 결합확률(Joint probability)이라 부릅니다."
-            },
-            {
-                id: 38, chapter: "4장 확률", topic: "조건부확률",
-                question: "사건 B가 일어났을 때 사건 A가 일어날 조건부확률 $P(A|B)$의 정의 공식은?",
-                options: [
-                    "$P(A|B) = \\frac{P(A \\cap B)}{P(B)}$",
-                    "$P(A|B) = \\frac{P(B)}{P(A \\cap B)}$",
-                    "$P(A|B) = P(A) \\times P(B)$",
-                    "$P(A|B) = P(A) + P(B)$"
-                ],
-                correctIndex: 0,
-                explanation: "조건부확률 공식은 결합확률을 조건의 확률로 나눈 $P(A \\cap B) / P(B)$입니다."
-            },
-            {
-                id: 39, chapter: "4장 확률", topic: "독립사건",
-                question: "두 사건 A와 B가 서로 독립사건(Independence events)일 때 성립하는 조건으로 옳은 것은?",
-                options: [
-                    "$P(A|B) = P(A)$",
-                    "$P(A \\cap B) = P(A) + P(B)$",
-                    "$P(A|B) = 0$",
-                    "$P(A|B) = 1$"
-                ],
-                correctIndex: 0,
-                explanation: "독립사건이면 조건이 확률에 영향을 주지 않으므로 $P(A|B) = P(A)$가 성립합니다."
-            },
-            {
-                id: 40, chapter: "4장 확률", topic: "곱셈규칙",
-                question: "두 사건 A와 B의 교집합 확률 $P(A \\cap B)$를 구하는 곱셈규칙 공식은?",
-                options: [
-                    "$P(A \\cap B) = P(B)P(A|B)$",
-                    "$P(A \\cap B) = P(A) + P(B)$",
-                    "$P(A \\cap B) = P(A) / P(B)$",
-                    "$P(A \\cap B) = 1 - P(A)$"
-                ],
-                correctIndex: 0,
-                explanation: "곱셈규칙은 독립 여부와 무관하게 항상 $P(A \\cap B) = P(B)P(A|B)$가 성립합니다."
-            },
-            {
-                id: 41, chapter: "4장 확률", topic: "독립사건의 곱셈규칙",
-                question: "두 사건 A와 B가 서로 **독립**일 때, 교집합 확률 $P(A \\cap B)$는 어떻게 계산되는가?",
-                options: [
-                    "$P(A) \\times P(B)$",
-                    "$P(A) + P(B)$",
-                    "$P(A) - P(B)$",
-                    "$P(A|B)$"
-                ],
-                correctIndex: 0,
-                explanation: "독립사건일 때의 곱셈규칙은 각각의 확률을 곱한 $P(A)P(B)$입니다."
-            },
-            {
-                id: 42, chapter: "4장 확률", topic: "베이즈 정리 개념",
-                question: "조건부 확률을 구할 때 조건 상황이 역으로 되어 있는 확률(사후확률)을 이용하는 정리는?",
-                options: [
-                    "베이즈 정리(Bayes' theorem)",
-                    "큰 수의 법칙",
-                    "중심극한정리",
-                    "체비쇼프 부등식"
-                ],
-                correctIndex: 0,
-                explanation: "베이즈 정리는 조건 상황이 역으로 되어 있는 확률을 이용해 사후확률을 구하는 정리입니다."
-            },
-            {
-                id: 43, chapter: "4장 확률", topic: "사전확률과 사후확률",
-                question: "베이즈 정리와 관련하여, 어떤 사건이 일어나기 전 일어날 확률을 뜻하는 용어는?",
-                options: [
-                    "사전확률(Prior probability)",
-                    "사후확률(Posterior probability)",
-                    "결합확률",
-                    "주변확률"
-                ],
-                correctIndex: 0,
-                explanation: "사건이 일어나기 전 일어날 확률은 사전확률이라 부릅니다."
-            },
-            {
-                id: 44, chapter: "4장 확률", topic: "몬티 홀 퍼즐",
-                question: "유명한 몬티 홀 퍼즐(Monty Hall Puzzle)에서 출연자가 처음에 고른 문을 다른 문으로 바꾸는 전략의 당첨 확률은?",
-                options: [
-                    "바꾸는 것이 유리하며 당첨 확률이 2/3이다.",
-                    "유지하는 것이 유리하며 당첨 확률이 2/3이다.",
-                    "바꾸거나 유지하거나 당첨 확률은 1/2로 같다.",
-                    "바꾸면 무조건 0%가 된다."
-                ],
-                correctIndex: 0,
-                explanation: "몬티 홀 퍼즐에서 문을 바꾸면 당첨 확률이 2/3로 증가하므로 바꾸는 것이 유리합니다."
-            },
-            {
-                id: 45, chapter: "4장 확률", topic: "나무그림(수형도)",
-                question: "복잡한 확률 문제를 도표로 그려 이해하기 쉽게 만드는 도구의 명칭은?",
-                options: [
-                    "나무그림 (수형도, Tree diagram)",
-                    "산점도",
-                    "상자그림",
-                    "모자익 그림"
-                ],
-                correctIndex: 0,
-                explanation: "나무그림(수형도)은 복잡한 확률 문제를 도표로 그려 이해하기 쉽게 한 것입니다."
-            }
+            { id: 31, chapter: "4장 확률", topic: "사건과 표본공간", question: "일어날 수 있는 모든 가능한 단순사건을 모아 집합으로 표시한 것을 무엇이라 하는가?", options: ["표본공간(Sample Space)", "단순사건", "조건부확률", "여집합"], correctIndex: 0, explanation: "표본공간은 발생 가능한 모든 단순사건을 모아 집합으로 표시한 것이다." },
+            { id: 32, chapter: "4장 확률", topic: "표본공간의 성질", question: "표본공간을 구성하는 원소들이 갖추어야 할 필수적인 수학적 성질은?", options: ["모든 원소를 포함(exhaustive)하며 상호배반(mutually exclusive)이어야 한다.", "원소의 개수가 항상 짝수이어야 한다.", "각 원소의 확률은 모두 달라야 한다.", "음수 확률값을 반드시 포함해야 한다."], correctIndex: 0, explanation: "표본공간은 모든 원소를 포함(exhaustive)하고 상호배반(mutually exclusive)이어야 한다." },
+            { id: 33, chapter: "4장 확률", topic: "확률의 정의 접근법", question: "무수히 많이 시행하였을 때 그 사건이 일어난 비율이 수렴해가는 값으로 확률을 정의하는 접근법은?", options: ["상대적 비율 접근(Relative frequency approach)", "전통적 접근(Classic approach)", "주관적 접근(Subjective approach)", "공리적 접근"], correctIndex: 0, explanation: "무수히 많이 시행했을 때 수렴해가는 비율을 이용하는 것은 상대적 비율 접근이다." },
+            { id: 34, chapter: "4장 확률", topic: "확률 할당의 기본 규칙", question: "표본공간의 사건 $E_1, E_2, \\dots, E_n$에 대해 확률 할당 시 항상 성립하는 조건으로 옳은 것은?", options: ["$0 \\le P(E_i) \\le 1$ 이며 모든 사건의 확률 합은 1이다.", "각 사건의 확률은 항상 0.5여야 한다.", "확률의 합은 항상 표본의 크기 n과 같다.", "개별 확률은 1을 초과할 수 있다."], correctIndex: 0, explanation: "모든 사건의 확률은 0과 1 사이이며, 전부 더하면 1이 되어야 한다." },
+            { id: 35, chapter: "4장 확률", topic: "여집합 규칙", question: "사건 A의 여집합($A^C$) 확률을 구하는 여집합 규칙 공식은?", options: ["$P(A) = 1 - P(A^C)$", "$P(A) = P(A^C) - 1$", "$P(A) = 1 / P(A^C)$", "$P(A) = P(A^C)$"], correctIndex: 0, explanation: "여집합 규칙에 따라 $P(A) = 1 - P(A^C)$가 성립한다." },
+            { id: 36, chapter: "4장 확률", topic: "상호배반 사건의 합규칙", question: "두 사건 A와 B가 서로 상호배반(Mutually exclusive)일 때, 합집합의 확률 $P(A \\cup B)$는?", options: ["$P(A) + P(B)$", "$P(A) + P(B) - P(A \\cap B)$", "$P(A) \\times P(B)$", "0"], correctIndex: 0, explanation: "상호배반 사건인 경우 교집합 확률이 0이므로 $P(A \\cup B) = P(A) + P(B)$가 된다." },
+            { id: 37, chapter: "4장 확률", topic: "주변확률과 결합확률", question: "두 개 이상의 변수를 동시에 고려하는 상황에서 교집합의 확률을 뜻하는 용어는?", options: ["결합확률(Joint probability)", "주변확률(Marginal probability)", "조건부확률", "여집합 확률"], correctIndex: 0, explanation: "교집합의 확률은 결합확률(Joint probability)이라 부른다." },
+            { id: 38, chapter: "4장 확률", topic: "조건부확률", question: "사건 B가 일어났을 때 사건 A가 일어날 조건부확률 $P(A|B)$의 정의 공식은?", options: ["$P(A|B) = \\frac{P(A \\cap B)}{P(B)}$", "$P(A|B) = \\frac{P(B)}{P(A \\cap B)}$", "$P(A|B) = P(A) \\times P(B)$", "$P(A|B) = P(A) + P(B)$"], correctIndex: 0, explanation: "조건부확률 공식은 결합확률을 조건의 확률로 나눈 $P(A \\cap B) / P(B)$이다." },
+            { id: 39, chapter: "4장 확률", topic: "독립사건", question: "두 사건 A와 B가 서로 독립사건(Independence events)일 때 성립하는 조건으로 옳은 것은?", options: ["$P(A|B) = P(A)$", "$P(A \\cap B) = P(A) + P(B)$", "$P(A|B) = 0$", "$P(A|B) = 1$"], correctIndex: 0, explanation: "독립사건이면 조건이 확률에 영향을 주지 않으므로 $P(A|B) = P(A)$가 성립한다." },
+            { id: 40, chapter: "4장 확률", topic: "곱셈규칙", question: "두 사건 A와 B의 교집합 확률 $P(A \\cap B)$를 구하는 곱셈규칙 공식은?", options: ["$P(A \\cap B) = P(B)P(A|B)$", "$P(A \\cap B) = P(A) + P(B)$", "$P(A \\cap B) = P(A) / P(B)$", "$P(A \\cap B) = 1 - P(A)$"], correctIndex: 0, explanation: "곱셈규칙은 독립 여부와 무관하게 항상 $P(A \\cap B) = P(B)P(A|B)$가 성립한다." },
+            { id: 41, chapter: "4장 확률", topic: "독립사건의 곱셈규칙", question: "두 사건 A와 B가 서로 **독립**일 때, 교집합 확률 $P(A \\cap B)$는 어떻게 계산되는가?", options: ["$P(A) \\times P(B)$", "$P(A) + P(B)$", "$P(A) - P(B)$", "$P(A|B)$"], correctIndex: 0, explanation: "독립사건일 때의 곱셈규칙은 각각의 확률을 곱한 $P(A)P(B)$이다." },
+            { id: 42, chapter: "4장 확률", topic: "베이즈 정리 개념", question: "조건부 확률을 구할 때 조건 상황이 역으로 되어 있는 확률(사후확률)을 이용하는 정리는?", options: ["베이즈 정리(Bayes' theorem)", "큰 수의 법칙", "중심극한정리", "체비쇼프 부등식"], correctIndex: 0, explanation: "베이즈 정리는 조건 상황이 역으로 되어 있는 확률을 이용해 사후확률을 구하는 정리이다." },
+            { id: 43, chapter: "4장 확률", topic: "사전확률과 사후확률", question: "베이즈 정리와 관련하여, 어떤 사건이 일어나기 전 일어날 확률을 뜻하는 용어는?", options: ["사전확률(Prior probability)", "사후확률(Posterior probability)", "결합확률", "주변확률"], correctIndex: 0, explanation: "사건이 일어나기 전 일어날 확률은 사전확률이라 부른다." },
+            { id: 44, chapter: "4장 확률", topic: "몬티 홀 퍼즐", question: "유명한 몬티 홀 퍼즐(Monty Hall Puzzle)에서 출연자가 처음에 고른 문을 다른 문으로 바꾸는 전략의 당첨 확률은?", options: ["바꾸는 것이 유리하며 당첨 확률이 2/3이다.", "유지하는 것이 유리하며 당첨 확률이 2/3이다.", "바꾸거나 유지하거나 당첨 확률은 1/2로 같다.", "바꾸면 무조건 0%가 된다."], correctIndex: 0, explanation: "몬티 홀 퍼즐에서 문을 바꾸면 당첨 확률이 2/3로 증가하므로 바꾸는 것이 유리하다." },
+            { id: 45, chapter: "4장 확률", topic: "나무그림(수형도)", question: "복잡한 확률 문제를 도표로 그려 이해하기 쉽게 만드는 도구의 명칭은?", options: ["나무그림 (수형도, Tree diagram)", "산점도", "상자그림", "모자익 그림"], correctIndex: 0, explanation: "나무그림(수형도)은 복잡한 확률 문제를 도표로 그려 이해하기 쉽게 한 것이다." }
         ];
 
         let dbQuestions = [];
-        let currentChapter = "";
-        let chapterQuestions = [];
+        let currentQuestions = [];
         let currentIndex = 0;
         let score = 0;
         let answered = false;
+        let wrongNoteIds = new Set(); // 오답 ID 저장고
 
-        // Firebase 데이터 로드 및 자동 초기화
+        // 배열 셔플 함수 (Fisher-Yates 알고리즘)
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
         async function initDatabase() {
             try {
-                const dbRef = ref(db, 'statistics_quiz_full_clean');
+                const dbRef = ref(db, 'statistics_quiz_full_random_v2');
                 const snapshot = await get(dbRef);
 
                 if (!snapshot.exists()) {
@@ -661,6 +236,7 @@
 
                 document.getElementById('loading-spinner').classList.add('hidden');
                 document.getElementById('chapter-selection').classList.remove('hidden');
+                updateWrongNoteUI();
             } catch (error) {
                 console.error("Firebase 연동 오류:", error);
                 document.getElementById('loading-spinner').innerHTML = `
@@ -670,9 +246,49 @@
             }
         }
 
-        function startQuiz(chapterName) {
-            currentChapter = chapterName;
-            chapterQuestions = dbQuestions.filter(q => q.chapter === chapterName);
+        function updateWrongNoteUI() {
+            document.getElementById('wrong-count').innerText = wrongNoteIds.size;
+            const btnWrong = document.getElementById('btn-wrong-note');
+            if (wrongNoteIds.size === 0) {
+                btnWrong.classList.add('opacity-50', 'cursor-not-allowed');
+                btnWrong.disabled = true;
+            } else {
+                btnWrong.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnWrong.disabled = false;
+            }
+        }
+
+        // 단원별 퀴즈 시작 (문제 순서 및 보기 순서 랜덤 섞기 적용)
+        window.startQuiz = function(chapterName) {
+            const rawQuestions = dbQuestions.filter(q => q.chapter === chapterName);
+            setupRandomQuiz(rawQuestions, chapterName);
+        }
+
+        // 오답 노트 퀴즈 시작
+        window.startWrongNoteQuiz = function() {
+            if (wrongNoteIds.size === 0) return;
+            const rawQuestions = dbQuestions.filter(q => wrongNoteIds.has(q.id));
+            setupRandomQuiz(rawQuestions, "오답 노트 복습");
+        }
+
+        function setupRandomQuiz(rawQuestions, titleName) {
+            // 문항 순서 셔플
+            let shuffledQuestions = shuffleArray(rawQuestions);
+
+            // 보기(Options) 순서도 각각 섞어주기 (정답 인덱스 추적 포함)
+            currentQuestions = shuffledQuestions.map(q => {
+                let optionsWithIndex = q.options.map((opt, idx) => ({ text: opt, isCorrect: idx === q.correctIndex }));
+                let shuffledOptions = shuffleArray(optionsWithIndex);
+                let newCorrectIndex = shuffledOptions.findIndex(opt => opt.isCorrect);
+
+                return {
+                    ...q,
+                    chapter: titleName,
+                    options: shuffledOptions.map(opt => opt.text),
+                    correctIndex: newCorrectIndex
+                };
+            });
+
             currentIndex = 0;
             score = 0;
 
@@ -685,13 +301,14 @@
             document.getElementById('quiz-screen').classList.add('hidden');
             document.getElementById('result-screen').classList.add('hidden');
             document.getElementById('chapter-selection').classList.remove('hidden');
+            updateWrongNoteUI();
         }
 
         function showQuestion() {
             answered = false;
-            const q = chapterQuestions[currentIndex];
+            const q = currentQuestions[currentIndex];
 
-            document.getElementById('progress-text').innerText = `문제 ${currentIndex + 1} / ${chapterQuestions.length}`;
+            document.getElementById('progress-text').innerText = `문제 ${currentIndex + 1} / ${currentQuestions.length}`;
             document.getElementById('score-text').innerText = `${score} 점`;
             document.getElementById('active-chapter-tag').innerText = q.chapter;
             document.getElementById('topic-tag').innerText = q.topic;
@@ -701,6 +318,7 @@
             optionsContainer.innerHTML = '';
             document.getElementById('explanation-box').classList.add('hidden');
             document.getElementById('next-btn').classList.add('hidden');
+            document.getElementById('dont-know-container').classList.remove('hidden'); // 모르겠어요 버튼 표시
 
             q.options.forEach((option, idx) => {
                 const btn = document.createElement('button');
@@ -728,12 +346,21 @@
             if (answered) return;
             answered = true;
 
-            const q = chapterQuestions[currentIndex];
+            const q = currentQuestions[currentIndex];
             const isCorrect = selectedIndex === q.correctIndex;
             const buttons = document.getElementById('options-container').children;
-            const pointsPerQuestion = Math.round(100 / chapterQuestions.length);
+            const pointsPerQuestion = Math.round(100 / currentQuestions.length);
 
-            if (isCorrect) score += pointsPerQuestion;
+            document.getElementById('dont-know-container').classList.add('hidden'); // 모르겠어요 숨기기
+
+            if (isCorrect) {
+                score += pointsPerQuestion;
+                // 맞췄으면 오답노트에서 제거 (이미 들어있었다면)
+                wrongNoteIds.delete(q.id);
+            } else {
+                // 틀렸으면 오답노트에 추가
+                wrongNoteIds.add(q.id);
+            }
             document.getElementById('score-text').innerText = `${score} 점`;
 
             for (let i = 0; i < buttons.length; i++) {
@@ -746,6 +373,31 @@
                 }
             }
 
+            showExplanation(isCorrect, q);
+        }
+
+        // 모르겠어요 버튼 핸들러
+        function handleDontKnow() {
+            if (answered) return;
+            answered = true;
+
+            const q = currentQuestions[currentIndex];
+            wrongNoteIds.add(q.id); // 오답노트에 추가
+
+            const buttons = document.getElementById('options-container').children;
+            document.getElementById('dont-know-container').classList.add('hidden');
+
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true;
+                if (i === q.correctIndex) {
+                    buttons[i].classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-900');
+                }
+            }
+
+            showExplanation(false, q);
+        }
+
+        function showExplanation(isCorrect, q) {
             const expBox = document.getElementById('explanation-box');
             const badge = document.getElementById('result-badge');
             const expText = document.getElementById('explanation-text');
@@ -755,14 +407,14 @@
                 badge.innerText = "정답입니다! 🎉";
             } else {
                 badge.className = "font-bold text-sm px-2.5 py-1 rounded inline-block bg-rose-100 text-rose-800";
-                badge.innerText = "오답입니다 💡";
+                badge.innerText = "오답노트에 추가되었습니다 💡";
             }
 
             expText.innerHTML = `<strong>해설:</strong> ${q.explanation}`;
             expBox.classList.remove('hidden');
 
             const nextBtn = document.getElementById('next-btn');
-            nextBtn.innerText = (currentIndex < chapterQuestions.length - 1) ? "다음 문제로 →" : "결과 보기 🏆";
+            nextBtn.innerText = (currentIndex < currentQuestions.length - 1) ? "다음 문제로 →" : "결과 보기 🏆";
             nextBtn.classList.remove('hidden');
 
             if (window.renderMathInElement) {
@@ -777,7 +429,7 @@
 
         function nextQuestion() {
             currentIndex++;
-            if (currentIndex < chapterQuestions.length) {
+            if (currentIndex < currentQuestions.length) {
                 showQuestion();
             } else {
                 document.getElementById('quiz-screen').classList.add('hidden');
@@ -786,12 +438,13 @@
             }
         }
 
-        // 이벤트 리스너 안전 연결
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('btn-ch2').addEventListener('click', () => startQuiz('2장 표와 그래프'));
             document.getElementById('btn-ch3').addEventListener('click', () => startQuiz('3장 수치 기술통계'));
             document.getElementById('btn-ch4').addEventListener('click', () => startQuiz('4장 확률'));
+            document.getElementById('btn-wrong-note').addEventListener('click', startWrongNoteQuiz);
 
+            document.getElementById('btn-dont-know').addEventListener('click', handleDontKnow);
             document.getElementById('back-to-select').addEventListener('click', returnToChapterSelect);
             document.getElementById('retry-select').addEventListener('click', returnToChapterSelect);
             document.getElementById('next-btn').addEventListener('click', nextQuestion);
